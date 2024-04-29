@@ -22,158 +22,63 @@ ListFunctions = {
 }
 
 @dataclass
-class Estudantes():
+class Entity():
+    def toString(self, header=False):
+        result='';
+        if (not header):
+            for attribute in self.__dict__:
+                value=self.__getattribute__(attribute)
+                result=result+str(value)+ " | "
+        else:
+            for attribute in self.__dict__:
+                result = result+str(attribute).upper()+" | "
+
+        return result
+
+
+    def toJSON(self):
+        return json.dumps(
+            self,
+            default=lambda o: o.__dict__,
+            sort_keys=True,
+            indent=4)
+
+    def fromJSON(self,Entity):
+        for attribute in self.__dict__:
+            self.__setattr__(attribute,Entity[attribute])
+
+@dataclass
+class Estudantes(Entity):
     ID:int=0
     nome:str=''
     cpf:str=''
     status:bool=True;
 
-    def toString(self, header=False):
-        result='';
-        if (not header):
-            for attribute in self.__dict__:
-                value=self.__getattribute__(attribute)
-                result=result+str(value)+ " | "
-        else:
-            for attribute in self.__dict__:
-                result = result+str(attribute).upper()+" | "
-
-        return result
-
-
-    def toJSON(self):
-        return json.dumps(
-            self,
-            default=lambda o: o.__dict__,
-            sort_keys=True,
-            indent=4)
-
-    def fromJSON(self,Entity):
-        for attribute in self.__dict__:
-            self.__setattr__(attribute,Entity[attribute])
-
-
 @dataclass
-class Professores:
+class Professores(Entity):
     ID:int=0
     nome:str=''
     cpf:str=''
     status:bool=True;
 
-    def toString(self, header=False):
-        result='';
-        if (not header):
-            for attribute in self.__dict__:
-                value=self.__getattribute__(attribute)
-                result=result+str(value)+ " | "
-        else:
-            for attribute in self.__dict__:
-                result = result+str(attribute).upper()+" | "
-
-        return result
-
-
-    def toJSON(self):
-        return json.dumps(
-            self,
-            default=lambda o: o.__dict__,
-            sort_keys=True,
-            indent=4)
-
-    def fromJSON(self,Entity):
-        for attribute in self.__dict__:
-            self.__setattr__(attribute,Entity[attribute])
-
-
 @dataclass
-class Disciplinas:
+class Disciplinas(Entity):
     ID:int=0
     nome:str=''
     status:bool=True;
 
-    def toString(self, header=False):
-        result='';
-        if (not header):
-            for attribute in self.__dict__:
-                value=self.__getattribute__(attribute)
-                result=result+str(value)+ " | "
-        else:
-            for attribute in self.__dict__:
-                result = result+str(attribute).upper()+" | "
-
-        return result
-
-
-    def toJSON(self):
-        return json.dumps(
-            self,
-            default=lambda o: o.__dict__,
-            sort_keys=True,
-            indent=4)
-
-    def fromJSON(self,Entity):
-        for attribute in self.__dict__:
-            self.__setattr__(attribute,Entity[attribute])
-
 @dataclass
-class Turmas:
+class Turmas(Entity):
     ID:int=0
     IDProfessor:int=0
     IDDisciplina:int=0
     status:bool=True;
 
-    def toString(self, header=False):
-        result='';
-        if (not header):
-            for attribute in self.__dict__:
-                value=self.__getattribute__(attribute)
-                result=result+str(value)+ "     |     "
-        else:
-            for attribute in self.__dict__:
-                result = result+str(attribute).upper()+"     |     "
-
-        return result
-
-    def toJSON(self):
-        return json.dumps(
-            self,
-            default=lambda o: o.__dict__,
-            sort_keys=True,
-            indent=4)
-
-    def fromJSON(self,Entity):
-        for attribute in self.__dict__:
-            self.__setattr__(attribute,Entity[attribute])
-
 @dataclass
-class Matrículas:
+class Matrículas(Entity):
     IDTurma:int=0
     IDEstudante:int=0
     status:bool=True;
-
-    def toString(self, header=False):
-        result='';
-        if (not header):
-            for attribute in self.__dict__:
-                value=self.__getattribute__(attribute)
-                result=result+str(value)+ " | "
-        else:
-            for attribute in self.__dict__:
-                result = result+str(attribute).upper()+" | "
-
-        return result
-
-
-    def toJSON(self):
-        return json.dumps(
-            self,
-            default=lambda o: o.__dict__,
-            sort_keys=True,
-            indent=4)
-
-    def fromJSON(self,Entity):
-        for attribute in self.__dict__:
-            self.__setattr__(attribute,Entity[attribute])
 
 @dataclass
 class UI:
