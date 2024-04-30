@@ -196,16 +196,18 @@ class Data:
 
 class Crud:
 
+    def Save(Path, List):
+        with open(Path, "w") as Arquivo:
+            json.dump(List, Arquivo)
+            Arquivo.close()
+
     #Método de inserção nas listas de cada Entidade
     def Create(Entity):
         Path=Data.GetPath(Entity)
         Name=Generics.GetEntityName(Entity)
         List=Data.GetListEntity(Entity)
         List.append(Data.SetEstr(Entity))
-
-        with open(Path, "w") as Arquivo:
-            json.dump(List, Arquivo)
-            Arquivo.close()
+        Save(Path, List);
         print(Name +" inserido com sucesso!")
 
     #Método para listar todas as entidades
@@ -234,29 +236,40 @@ class Crud:
         except:
             print("Digite um valor válido")
             exit()
+        object=''
+        Entity=''
         if len(List)>0:
             for item in List:
-                item=json.loads(item)
-                if int(item["Codigo"])==id:
-                    Entity=item
+                Entity=json.loads(item)
+                if int(Entity["ID"])==id:
+                    object = Generics.GetObject(TypeEntity)
+                    object.fromJSON(Entity)
                     if show:
                         UI.HeaderEntity(TypeEntity)
-                        print(Entity.ToString())
+                        print(object.toString())
                         print(" ")
                     break
             if Entity=="":
                 print("Codigo '"+str(id)+"' não encontrado(a) na lista de "+EntityName+"s")
-            return Entity
+            return object
         else:
             print("Nenhum(a) " + EntityName + " cadastrado(a)!")
 
     #Método para verificar se o usuário deseja listar todos ou uma entidade específica
     def RedirectRead(Entity):
-        Confirma=input("Deseja listar todos? (S/N)\n")
-        if Confirma.upper()=="S":
+        entityName=Generics.GetEntityName(Entity)
+        print("---------- Listar "+entityName+"s ----------")
+        print("  1 - Listar todos")
+        print("  2 - Listar um")
+        print("  3 - Voltar")
+        print("--------------------")
+        Confirma=int(input("Selecione uma das opções acima:\n").strip())
+        if Confirma==1:
             Crud.ReadAll(Entity)
-        elif Confirma.upper()=='N':
+        elif Confirma==2:
             Crud.ReadOne(Entity, True)
+        elif Confirma==3:
+            print("Retornando ao menu principal...")
         else:
             print("Digite um valor válido")
 
@@ -284,14 +297,18 @@ class Crud:
 
     #Método para "excluir" entidades
     def Delete(EntityType):
-        List=Data.GetListEntity(EntityType)
         Entity=Crud.ReadOne(EntityType)
-        EntityName=Generics.GetEntityName(EntityType)
         if Entity!=None:
-            Confirma=input("Deseja remover o(a) "+EntityName+" '"+Entity["Nome"]+"'? (S/N)\n")
-            if Confirma.upper()=="S":
-                Entity["Status"]=False;
-                print(EntityName+" '"+ Entity["Nome"]+"' foi removido, porém ainda estará visível na consulta por código.")
+            EntityName=Generics.GetEntityName(EntityType)
+            List=Data.GetListEntity(EntityType)
+            Confirma=input("Confirma a exclusão? (S/N)\n")
+            if Confirma.upper().strip()=="S":
+                List.remove(Entity.toJSON())
+                Entity.status=False;
+                List.append(Entity.toJSON())
+                Path=Data.GetPath(EntityType)
+                Crud.Save(Path, List)
+                print(EntityName+" removido(a), porém ainda estará visível na consulta por código.")
 
     #Método de redirecionamento de CRUD
     def Set(Entity, Function):
