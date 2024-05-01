@@ -1,6 +1,6 @@
-#Luis Felipe Kryzozun Correa - Análise e Desenvolvimento de sistemas - Raciocínio Computacional - Formativa 5
-import json;
-import os;
+#Luis Felipe Kryzozun Correa - Análise e Desenvolvimento de sistemas - Raciocínio Computacional - Somativa Final
+import json
+import os
 import uuid
 from dataclasses import dataclass
 
@@ -21,6 +21,7 @@ ListFunctions = {
     4: "Excluir",
 }
 
+#Classe genérica para herança de funções comuns a todas as entidades
 @dataclass
 class Entity():
     def toString(self, header=False):
@@ -47,6 +48,7 @@ class Entity():
         for attribute in self.__dict__:
             self.__setattr__(attribute,Entity[attribute])
 
+#Classe de estudates
 @dataclass
 class Estudantes(Entity):
     ID:int=0
@@ -54,6 +56,7 @@ class Estudantes(Entity):
     cpf:str=''
     status:bool=True;
 
+#Classe de professores
 @dataclass
 class Professores(Entity):
     ID:int=0
@@ -61,12 +64,14 @@ class Professores(Entity):
     cpf:str=''
     status:bool=True;
 
+#Classe de disciplinas
 @dataclass
 class Disciplinas(Entity):
     ID:int=0
     nome:str=''
     status:bool=True;
 
+#Classe de turmas
 @dataclass
 class Turmas(Entity):
     ID:int=0
@@ -74,12 +79,14 @@ class Turmas(Entity):
     IDDisciplina:int=0
     status:bool=True;
 
+#Classe de matriculas
 @dataclass
-class Matrículas(Entity):
+class Matriculas(Entity):
     IDTurma:int=0
     IDEstudante:int=0
     status:bool=True;
 
+#Classe genérica para interface de apresentação
 @dataclass
 class UI:
     #Método para exibir menu principal
@@ -92,18 +99,15 @@ class UI:
 
     #Método para exibir menu secundário
     def PrintMenuSecundario(Entity):
-        if Generics.ValidFunction(Entity):
-            if Entity!=9:
-                MenuName=Generics.GetEntityName(Entity)
-                print("-"*10+' Menu de '+MenuName+'s '+'-'*10)
-                for function in ListFunctions:
-                    print(' '*2 + str(function) +' - '+ ListFunctions[function])
-                print(' '*2 +'9 - Voltar')
-                print("-"*(29+len(MenuName)))
-            else:
-                print("Finalizando o sistema!")
+        if Entity!=9:
+            MenuName=Generics.GetEntityName(Entity)
+            print("-"*10+' Menu de '+MenuName+'s '+'-'*10)
+            for function in ListFunctions:
+                print(' '*2 + str(function) +' - '+ ListFunctions[function])
+            print(' '*2 +'9 - Voltar')
+            print("-"*(29+len(MenuName)))
         else:
-            print("!!! Selecione uma opção válida !!!")
+            print("Finalizando o sistema!")
 
     #Método para mostrar o cabeçalho da listagem
     def HeaderEntity(Entity):
@@ -118,9 +122,11 @@ class UI:
         return Cabecalho
 
 
+#Classe genérica para funções gerais
 @dataclass
 class Generics:
 
+    #Método para retorno do objeto correto em relação ao númmero da entidade
     def GetObject(Entity):
         if Entity==1: object=Estudantes()
         elif Entity==2: object=Professores()
@@ -140,11 +146,17 @@ class Generics:
 
     #Validando se a função informada existe
     def ValidFunction(Function):
-        return Function in ListFunctions
+        if Function==9:
+            return True
+        else:
+            return Function in ListFunctions
 
     #Validando se a entidade informada existe
     def ValidEntity(Entity):
-        return Entity in ListEntitys
+        if Entity==9:
+            return True
+        else:
+            return Entity in ListEntitys
 
     #Método para pegar input do usuário
     def GetOption(Text=''):
@@ -161,6 +173,7 @@ class Generics:
         if index<=len(str):
             return str[0:index]
 
+#Classe relacionada ao acesso dos dados
 @dataclass
 class Data:
 
@@ -194,8 +207,10 @@ class Data:
             arquivo.close()
         return List
 
+#Classe relacionada a operações de CRUD com os dados
 class Crud:
 
+    #Método para salvar os dados
     def Save(Path, List):
         with open(Path, "w") as Arquivo:
             json.dump(List, Arquivo)
@@ -207,7 +222,7 @@ class Crud:
         Name=Generics.GetEntityName(Entity)
         List=Data.GetListEntity(Entity)
         List.append(Data.SetEstr(Entity))
-        Save(Path, List);
+        Crud.Save(Path, List);
         print(Name +" inserido com sucesso!")
 
     #Método para listar todas as entidades
@@ -278,18 +293,22 @@ class Crud:
         Entity=Crud.ReadOne(EntityType)
         EntityName=Generics.GetEntityName(EntityType)
         if Entity!=None:
-            Confirma=input("Deseja alterar o(a) "+EntityName+" '"+Entity["Nome"]+"'? (S/N)\n")
+            Confirma=input("Deseja alterar o(a) "+EntityName+" '"+Entity.nome+"'? (S/N)\n")
             if Confirma.upper()=="S":
                 List=Data.GetListEntity(EntityType)
-                for key in List[0].keys():
-                    if key!="Codigo":
-                        Confirma=input("Deseja alterar o "+key+"? (S/N/X)\n")
+                List.remove(Entity.toJSON())
+                for attribute in Entity.__dict__:
+                    if attribute!="ID" and attribute!="status":
+                        Confirma=input("Deseja alterar o "+attribute+"? (S/N/X)\n")
                         if Confirma.upper()=="S":
-                            NewValue=input("Digite o novo valor para o "+key+"\n")
-                            Entity[key]=NewValue
+                            NewValue=input("Digite o novo valor para o "+attribute+"\n")
+                            Entity.__setattr__(attribute, NewValue)
                         elif Confirma.upper()=="X":
                             print("O processo foi encerrado e as informações alteradas foram salvas")
                             break
+                List.append(Entity.toJSON())
+                Path = Data.GetPath(EntityType)
+                Crud.Save(Path, List)
                 print(EntityName+" alterado(a) com sucesso!")
                 print(" ")
             else:
@@ -326,23 +345,20 @@ def init():
         if Generics.ValidEntity(OptionEntity):
             if OptionEntity!=9:
                 while True:
-                    if OptionEntity==1:
-                        UI.PrintMenuSecundario(OptionEntity)
-                        OptionFunction=Generics.GetOption();
-                        if Generics.ValidFunction(OptionFunction):
-                            if OptionFunction!=9:
-                                Crud.Set(OptionEntity, OptionFunction)
-                            else:
-                                break
+                    UI.PrintMenuSecundario(OptionEntity)
+                    OptionFunction=Generics.GetOption();
+                    if Generics.ValidFunction(OptionFunction):
+                        if OptionFunction!=9:
+                            Crud.Set(OptionEntity, OptionFunction)
                         else:
-                            print("!!! Selecione uma opção válida !!!")
+                            break
                     else:
-                        print("Em desenvolvimento")
-                        break
+                        print("!!! Selecione uma opção válida !!!")
             else:
                 print("Finalizando sistema...")
                 break
         else:
             print("!!! Selecione uma opção válida !!!")
+    exit()
 
 init()
